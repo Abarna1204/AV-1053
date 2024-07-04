@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Select, Button, Col, Row } from 'antd';
+import { Form, Select, Button, Col, Row, message } from 'antd';
 import axios from 'axios';
 
 const { Option } = Select;
@@ -7,7 +7,7 @@ const { Option } = Select;
 function Forms() {
   const [policies, setPolicies] = useState([]);
   const [policyTypes, setPolicyTypes] = useState([]);
-
+  const [form] = Form.useForm(); 
 
   useEffect(() => {
     fetchPolicies();
@@ -15,48 +15,60 @@ function Forms() {
 
   const fetchPolicies = async () => {
     try {
-      const response = await axios.post('https://prod.api.authnull.com/api/v1/policyService/FilterPolicy',
-        {
-          id: 1,
-          tenantId: 7,
-          orgId: 84,
-          policyStatus: "Approved",
-          policyType: 'local',
-          protocol: "",
-          sourceEndpoint: "",
-          sourceEndpointMatch: "",
-          sourceEndpointType: "",
-          timestamp: 1718266293,
-          walletUsers: "muthudurai0058@gmail.com", 
-          filters: [
-            {
-              filterParameter: 'policyType',
-              filterValue: 'local',
-            },
-          ],
-          requestId: '',
-          limit: 100,
-          sort: {},
-        });
-        
-      console.log(response.data);  
-      setPolicies(response.data.data); 
-      setPolicyTypes(response.data.data)
+      const response = await axios.post('https://prod.api.authnull.com/api/v1/policyService/FilterPolicy', {
+        id: 1,
+        tenantId: 7,
+        orgId: 84,
+        policyStatus: "Approved",
+        policyType: 'local',
+        protocol: "",
+        sourceEndpoint: "",
+        sourceEndpointMatch: "",
+        sourceEndpointType: "",
+        timestamp: 1718266293,
+        walletUsers: "muthudurai0058@gmail.com",
+        filters: [
+          {
+            filterParameter: 'policyType',
+            filterValue: 'local',
+          },
+        ],
+        requestId: '',
+        limit: 100,
+        sort: {},
+      });
+
+      console.log(response.data);
+      setPolicies(response.data.data);
+      setPolicyTypes(response.data.data);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
 
+  const handleFinish = (values) => {    
+    localStorage.setItem('policyName', values.policyName);
+    localStorage.setItem('policyType', values.policyType);
+    localStorage.setItem('endpointUser', values.endpointUser);
+    localStorage.setItem('endpointUsers', values.endpointUsers);
+    localStorage.setItem('endpoints', values.endpoints);
+    localStorage.setItem('endpointsAndGroups', values.endpointsAndGroup);
+    localStorage.setItem('policyAction', values.policyAction);
+    localStorage.setItem('walletUsers', values.walletUsers);
+    message.success('Policy created and stored in local storage!');
+    console.log(values);
+  };
+
   return (
     <div style={{ marginLeft: "30px", marginRight: "30px" }}>
       <h1>Create Policy</h1>
-      <Form layout='vertical'>
+      <Form form={form} layout='vertical' onFinish={handleFinish}>
         <Row gutter={16} style={{ marginBottom: 20 }}>
           <Col span={12}>
             <Form.Item
               label="Policy Name"
               name="policyName"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: 'Please select a policy name' }]}
             >
               <Select placeholder='Select Policy Name'>
                 {policies.map((policy) => (
@@ -71,10 +83,10 @@ function Forms() {
             <Form.Item
               label="Policy Type"
               name="policyType"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: 'Please select a policy type' }]}
             >
               <Select placeholder="Select Policy Type">
-              {policyTypes.map((type) => (
+                {policyTypes.map((type) => (
                   <Option key={type.id} value={type.policyTypes}>
                     {type.setPolicyTypes}
                   </Option>
@@ -90,7 +102,7 @@ function Forms() {
             <Form.Item
               label="Endpoints and Endpoint Groups"
               name="endpointsAndGroups"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: 'Please select endpoints and endpoint groups' }]}
             >
               <Select placeholder="Select Endpoints and Endpoint Groups">
                 <Option value="emp3,emp5">emp3,emp5</Option>
@@ -102,7 +114,7 @@ function Forms() {
             <Form.Item
               label="Endpoints"
               name="endpoints"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: 'Please select endpoints' }]}
             >
               <Select placeholder="Select Endpoints">
                 <Option value="endpoint1">Endpoint1</Option>
@@ -116,7 +128,7 @@ function Forms() {
             <Form.Item
               label="Endpoints Users"
               name="endpointUsers"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: 'Please select endpoint users' }]}
             >
               <Select placeholder="Select Endpoint Users">
                 <Option value="user1">User1</Option>
@@ -128,7 +140,7 @@ function Forms() {
             <Form.Item
               label="Endpoints User"
               name="endpointUser"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: 'Please select an endpoint user' }]}
             >
               <Select placeholder="Select Endpoint User">
                 <Option value="user3">User3</Option>
@@ -140,7 +152,11 @@ function Forms() {
         <h3 style={{ color: 'blue' }}>Policy applicable to</h3>
         <Row>
           <Col span={12}>
-            <Form.Item>
+            <Form.Item
+              label="Wallet Users"
+              name="walletUsers"
+              rules={[{ required: true, message: 'Please select wallet users' }]}
+            >
               <Select placeholder="Select Wallet Users">
                 <Option value="muthudurai1011@gmail.com">muthudurai1011@gmail.com</Option>
                 <Option value="hema@kloudone.io">hema@kloudone.io</Option>
@@ -155,7 +171,11 @@ function Forms() {
         <h3 style={{ color: 'blue' }}>Select the policy action</h3>
         <Row>
           <Col span={12}>
-            <Form.Item>
+            <Form.Item
+              label="Policy Action"
+              name="policyAction"
+              rules={[{ required: true, message: 'Please select a policy action' }]}
+            >
               <Select placeholder="Allow">
                 <Option value="Allow">Allow</Option>
                 <Option value="Deny">Deny</Option>
@@ -164,8 +184,8 @@ function Forms() {
             </Form.Item>
           </Col>
         </Row>
+        <Button type="primary" htmlType="submit" style={{ float: "right" }}>Create Policy</Button>
       </Form>
-      <Button type="primary" style={{ float: "right" }}>Create Policy</Button>
     </div>
   );
 }
